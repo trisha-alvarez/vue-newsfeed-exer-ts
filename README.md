@@ -5,6 +5,11 @@
 npm install
 ```
 
+### Load JSON db
+```
+npm run backend
+```
+
 ### Compiles and hot-reloads for development
 ```
 npm run serve
