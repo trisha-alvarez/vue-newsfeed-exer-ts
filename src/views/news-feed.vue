@@ -5,7 +5,7 @@
     </div>
     <div class="col-4">
       <h5>Post something!</h5>
-      <post-new />
+      <post-new @newPost="newPost"/>
     </div>
   </div>
 </template>
@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import IPost from '@/interface/posts'
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, watch } from 'vue'
 import { fetchPosts } from '@/composables/post-requests'
 import posts from '@/components/posts.vue'
 import postNew from '@/components/post-new.vue'
@@ -28,15 +28,17 @@ export default defineComponent({
     const postsList = ref<IPost[]>([])
 
     onMounted( async () => {
-      try {
-        const res = await fetchPosts()
-        postsList.value = res
-      } catch(e) {
-        alert("Error: Cannot load posts.")
-      }
+      const res = await fetchPosts()
+      postsList.value = res
     })
 
+    const newPost = async (event: IPost) => {
+      const res = await fetchPosts()
+      postsList.value = res
+    }
+
     return {
+      newPost,
       postsList
     }
   }

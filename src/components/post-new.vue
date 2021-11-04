@@ -25,7 +25,7 @@ import { addPost } from '@/composables/post-requests'
 
 export default defineComponent({
     name: 'PostNew',
-    setup() {
+    setup(props, { emit }) {
         const state = ref<IPost>({
             title: '',
             author: '',
@@ -35,21 +35,17 @@ export default defineComponent({
         })
         const invalidInput = ref<boolean>(false)
 
-        watch(invalidInput, function (val) {
-            if(val) {
-                console.log("Analytics: Invalid Input")
-            }
-        })
-
         async function onSubmit() {
             invalidInput.value = false;
             if (state.value.title === "" || state.value.author === "" || state.value.content === "") {
                 invalidInput.value = true
                 return
             }
-            
-            try {
-                const res = await addPost(state.value)
+            const res = await addPost(state.value)
+            if(res){
+                alert('Post added!')
+                emit('newPost', state.value)
+
                 return state.value = {
                     title: '',
                     author: '',
@@ -57,8 +53,8 @@ export default defineComponent({
                     content: '',
                     id: ''
                 }
-            } catch(e) {
-                alert(e)
+            } else {
+                return
             }
         }
 
