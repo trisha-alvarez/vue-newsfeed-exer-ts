@@ -7,9 +7,6 @@
             <input type="text" v-model="state.author" name="author" placeholder="Author*" />
         </div>
         <div class="form-control">
-            <input type="date" v-model="state.date" name="date" placeholder="Date" />
-        </div>
-        <div class="form-control">
             <textarea form="update-form" v-model="state.content" name="content" placeholder="Content*"></textarea>
         </div>
 
@@ -20,8 +17,8 @@
 
 <script lang="ts">
 import IPost from '@/interface/posts'
-import { defineComponent, ref, watch } from 'vue'
-import { addPost } from '@/composables/post-requests'
+import { defineComponent, ref } from 'vue'
+import { addPost } from '@/composables/use-post'
 
 export default defineComponent({
     name: 'PostNew',
@@ -29,7 +26,7 @@ export default defineComponent({
         const state = ref<IPost>({
             title: '',
             author: '',
-            date: '',
+            date: new Date().toISOString().slice(0, 10),
             content: '',
             id: ''
         })
@@ -44,12 +41,12 @@ export default defineComponent({
             const res = await addPost(state.value)
             if(res){
                 alert('Post added!')
-                emit('newPost', state.value)
+                emit('refetchFeed', true)
 
                 return state.value = {
                     title: '',
                     author: '',
-                    date: '',
+                    date: new Date().toISOString().slice(0, 10),
                     content: '',
                     id: ''
                 }

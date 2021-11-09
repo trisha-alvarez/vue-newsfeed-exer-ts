@@ -38,8 +38,8 @@
 <script lang="ts">
 import IPost from '@/interface/posts'
 import { RouteNames } from '@/constants/route-names'
-import { defineComponent, PropType, ref, watch } from 'vue'
-import { updatePost } from '@/composables/post-requests'
+import { defineComponent, PropType, ref } from 'vue'
+import { updatePost } from '@/composables/use-post'
 import router from '@/router'
 
 export default defineComponent({
@@ -53,14 +53,7 @@ export default defineComponent({
     setup(props) {
       const state = ref<IPost>(props.post)
       const invalidInput = ref(false)
-
-      watch(invalidInput, function (val) {
-        if(val) {
-          console.log("Analytics: Invalid Input");
-        }
-      })
-
-      const redirectPostView = () : void => {
+      function redirectPostView() : void {
         router.push({ 
           name: RouteNames.POST_VIEW, 
           params: { 
@@ -68,7 +61,6 @@ export default defineComponent({
           }
         })
       }
-
       async function onSubmit() {
         invalidInput.value = false;
         if (state.value.title === "" || state.value.author === "" || state.value.content === "") {
@@ -76,9 +68,10 @@ export default defineComponent({
           return
         }
 
-        const res = await updatePost(props.post)
-        alert('Post updated!')
-        redirectPostView()
+        if(await updatePost(props.post)){
+          alert('Post updated!')
+          redirectPostView()
+        }
       }
 
       return {
