@@ -1,15 +1,27 @@
 <template>
   <div class="row p-5">
+      <span class="text-right">
+        <button type="button" class="btn" @click="redirectPostEdit">
+          <i class="fas fa-edit i-blue"></i>
+        </button>
+
+        <button type="button" class="btn" @click="postDelete">
+            <i class="fas fa-trash i-red"></i>
+        </button>
+      </span>
       <h1>{{post.title}}</h1>
-      <small>{{post.author}} | {{formatDate(post.date)}}</small>
+      <small>{{post.author}} | {{formattedDate}}</small>
       <p>{{post.content}}</p>
   </div>
 </template>
 
 <script lang="ts">
 import IPost from '@/interface/posts'
-import { defineComponent, PropType } from 'vue'
-import moment from 'moment'
+import { RouteNames } from '@/constants/route-names'
+import { computed, defineComponent, PropType } from 'vue'
+import { formatDate } from '@/composables/use-util'
+import { deletePost } from '@/composables/use-post'
+import router from '@/router'
 
 export default defineComponent({
     name: 'post',
@@ -19,13 +31,28 @@ export default defineComponent({
         required: true
       }
     },
-    setup() {
-      const formatDate = (date: string): string => {
-        return moment(String(date)).format('MMMM DD, YYYY')
+    setup(props) {
+      const formattedDate = computed((): string => {
+        return formatDate(props.post.date)
+      })
+      const postDelete = async (): Promise<void> => {
+        const res = await deletePost(props.post.id)
+        if (res) {
+          router.push({ name: RouteNames.NEWS_FEED })
+        }
       }
-      
+      const redirectPostEdit = (): void => {
+        router.push({ 
+          name: RouteNames.POST_EDIT, 
+          params: { 
+            id: props.post.id
+          }
+        })
+      }
       return {
-        formatDate
+        formattedDate,
+        postDelete,
+        redirectPostEdit
       }
     }
 })

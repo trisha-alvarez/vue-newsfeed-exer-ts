@@ -1,32 +1,19 @@
 <template>
     <div class="row">
-        <span class="text-right">
-            <router-link :to="{name: postEditRoute, params: { post: singlePost }}">
-                <button type="button" class="btn">
-                    <i class="fas fa-edit" style="color: #219EBC"></i>
-                </button>
-            </router-link>
-
-            <button type="button" class="btn" @click="postDelete">
-                <i class="fas fa-trash" style="color: #E63946"></i>
-            </button>
-        </span>
-
         <post :post="singlePost"/>
     </div>
 
     <div class="row">
-        <router-view :post="singlePost" />
+        <router-view :post="singlePost" v-if="isMounted"/>
     </div>
 </template>
 
 <script lang="ts">
 import IPost from '@/interface/posts'
-import { RouteNames } from '@/constants/route-names'
-import { defineComponent, ref, onMounted } from 'vue'
-import { fetchPost, deletePost } from '@/composables/post-requests'
+import { defineComponent, ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { fetchPost } from '@/composables/use-post'
 import post from '@/components/post.vue'
-import router from '@/router'
 
 export default defineComponent({
     name: 'PostView',
@@ -47,25 +34,25 @@ export default defineComponent({
             content: '',
             id: ''
         })
-
-        const postEditRoute: string = RouteNames.POST_EDIT
-        
-        const postDelete = async () => {
-            const res = await deletePost(props.id)
-            if (res === 200) {
-                router.push({ name: RouteNames.NEWS_FEED })
-            }
-        }
-        
+        const isMounted = ref<boolean>(false)
         onMounted( async () => {
             const res = await fetchPost(props.id)
             singlePost.value = res
+            isMounted.value = !isMounted.value
         })
+        async function refetchPost() {
+            const res = await fetchPost(props.id)
+            singlePost.value = res
+        }
+        const route = useRoute()
+        watch(
+            () => route.path,
+            refetchPost
+        )
 
         return {
             singlePost,
-            postDelete,
-            postEditRoute
+            isMounted
         }
     },
 })

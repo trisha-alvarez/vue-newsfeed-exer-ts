@@ -22,14 +22,14 @@ export async function addPost(post: IPost): Promise<IPost> {
     return data
 }
 
-export async function deletePost(id: string): Promise<boolean | number> {
+export async function deletePost(id: string): Promise<boolean> {
     if (confirm('Delete post?')) {
         const res = await fetch(`/api/posts/${id}`, {
             method: 'DELETE'
         })
-        return res.status
+        return (res.status === 200)
     } else {
-        return false
+        return false  
     }
 }
 

@@ -1,11 +1,11 @@
 <template>
   <div class="row">
     <div class="col-8">
-      <posts :posts="postsList"/>
+      <posts :posts="posts" @refetchFeed="refetchFeed"/>
     </div>
     <div class="col-4">
       <h5>Post something!</h5>
-      <post-new @newPost="newPost"/>
+      <post-new @refetchFeed="refetchFeed"/>
     </div>
   </div>
 </template>
@@ -13,8 +13,8 @@
 
 <script lang="ts">
 import IPost from '@/interface/posts'
-import { defineComponent, ref, onMounted, watch } from 'vue'
-import { fetchPosts } from '@/composables/post-requests'
+import { defineComponent, ref, onMounted } from 'vue'
+import { fetchPosts } from '@/composables/use-post'
 import posts from '@/components/posts.vue'
 import postNew from '@/components/post-new.vue'
 
@@ -25,21 +25,21 @@ export default defineComponent({
     postNew
   },
   setup() {
-    const postsList = ref<IPost[]>([])
-
+    const posts = ref<IPost[]>([])
+    const refetchFeed = async (event: boolean) => {
+      if(event) {
+        const res = await fetchPosts()
+        posts.value = res
+      }
+    }
     onMounted( async () => {
       const res = await fetchPosts()
-      postsList.value = res
+      posts.value = res
     })
-
-    const newPost = async (event: IPost) => {
-      const res = await fetchPosts()
-      postsList.value = res
-    }
-
+    
     return {
-      newPost,
-      postsList
+      posts,
+      refetchFeed
     }
   }
 })

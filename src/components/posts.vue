@@ -2,9 +2,20 @@
     <div class="posts">
         <div v-for="post in posts" :key="post.id">
             <div class="row p-5">
-                <h2>{{post.title}}</h2>
-                <small>{{post.author}} | {{formatDate(post.date)}}</small>
-                <p>{{contentExcerpt(post.content, 15)}} <small class="text-right"><router-link :to="{name: postViewRoute, params: { id: post.id }}">Read more</router-link></small></p>
+                <h2>
+                    {{post.title}}
+                    <span class="text-right">
+                        <button type="button" class="btn" @click="redirectPostEdit(post.id)">
+                            <i class="fas fa-edit i-blue"></i>
+                        </button>
+
+                        <button type="button" class="btn" @click="postDelete(post.id)">
+                            <i class="fas fa-trash i-red"></i>
+                        </button>
+                    </span>
+                </h2>
+                <small>{{post.author}} | {{formattedDate(post.date)}}</small>
+                <p>{{excerpt(post.content, 15)}} <small class="text-right link-primary" @click="readMoreRedirect(post.id)">Read more</small></p>
             </div>
         </div>
     </div>
@@ -12,9 +23,11 @@
 
 <script lang="ts">
 import IPost from '@/interface/posts'
+import { formatDate, contentExcerpt } from '@/composables/use-util'
+import { deletePost } from '@/composables/use-post'
 import { RouteNames } from '@/constants/route-names'
 import { defineComponent, PropType } from 'vue'
-import moment from 'moment'
+import router from '@/router'
 
 export default defineComponent({
     name: 'posts',
@@ -24,18 +37,43 @@ export default defineComponent({
             required: true
         }
     },
-    setup() {
-        const formatDate = (date: string): string => {
-            return moment(String(date)).format('MMMM DD, YYYY')
+    setup(props, { emit }) {
+        const excerpt = (content: string, words: number): string => {
+            return contentExcerpt(content, words)
         }
-        const contentExcerpt = (content: string, words: number) => {
-            return content.split(" ").splice(0, words).join(" ") + "..."
+        const formattedDate = (date: string) => {
+            return formatDate(date)
         }
-        const postViewRoute: string = RouteNames.POST_VIEW
+        function readMoreRedirect(id: string): void {
+            router.push({ 
+                name: RouteNames.POST_VIEW, 
+                params: { 
+                    id: id
+                }
+            })
+        }
+        function redirectPostEdit(id: string): void {
+            router.push({ 
+                name: RouteNames.POST_EDIT, 
+                params: { 
+                    id: id
+                }
+            })
+        }
+        async function postDelete(id: string): Promise<void> {
+            const res = await deletePost(id)
+            if (res) {
+                alert('Post deleted!')
+                emit('refetchFeed', res)
+            }
+        }
+        
         return {
-            contentExcerpt,
-            formatDate,
-            postViewRoute
+            excerpt,
+            formattedDate,
+            readMoreRedirect,
+            redirectPostEdit,
+            postDelete
         }
     }
 })
@@ -63,5 +101,8 @@ h2, small, p {
 }
 .text-right {
   text-align: right;
+}
+.link-primary {
+    cursor: pointer;
 }
 </style>
