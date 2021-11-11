@@ -1,7 +1,7 @@
 <template>
   <div class="row">
     <div class="col-8">
-      <posts :posts="postsList" @refetchFeed="refetchFeed"/>
+      <posts :posts="posts" @refetchFeed="refetchFeed"/>
     </div>
     <div class="col-4">
       <h5>Post something!</h5>
@@ -25,20 +25,20 @@ export default defineComponent({
     postNew
   },
   setup() {
-    const postsList = ref<IPost[]>([])
+    const posts = ref<IPost[]>([])
     const refetchFeed = async (event: boolean) => {
       if(event) {
         const res = await fetchPosts()
-        postsList.value = res
+        posts.value = res
       }
     }
     onMounted( async () => {
       const res = await fetchPosts()
-      postsList.value = res
+      posts.value = res
     })
     
     return {
-      postsList,
+      posts,
       refetchFeed
     }
   }

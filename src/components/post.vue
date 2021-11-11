@@ -2,15 +2,15 @@
   <div class="row p-5">
       <span class="text-right">
         <button type="button" class="btn" @click="redirectPostEdit">
-          <i class="fas fa-edit" style="color: #219EBC"></i>
+          <i class="fas fa-edit i-blue"></i>
         </button>
 
         <button type="button" class="btn" @click="postDelete">
-            <i class="fas fa-trash" style="color: #E63946"></i>
+            <i class="fas fa-trash i-red"></i>
         </button>
       </span>
       <h1>{{post.title}}</h1>
-      <small>{{post.author}} | {{formattedDate(post.date)}}</small>
+      <small>{{post.author}} | {{formattedDate}}</small>
       <p>{{post.content}}</p>
   </div>
 </template>
@@ -18,7 +18,7 @@
 <script lang="ts">
 import IPost from '@/interface/posts'
 import { RouteNames } from '@/constants/route-names'
-import { defineComponent, PropType } from 'vue'
+import { computed, defineComponent, PropType } from 'vue'
 import { formatDate } from '@/composables/use-util'
 import { deletePost } from '@/composables/use-post'
 import router from '@/router'
@@ -32,9 +32,9 @@ export default defineComponent({
       }
     },
     setup(props) {
-      const formattedDate = (date: string) => {
-          return formatDate(date)
-      }
+      const formattedDate = computed((): string => {
+        return formatDate(props.post.date)
+      })
       const postDelete = async (): Promise<void> => {
         const res = await deletePost(props.post.id)
         if (res) {
@@ -45,7 +45,7 @@ export default defineComponent({
         router.push({ 
           name: RouteNames.POST_EDIT, 
           params: { 
-            post: props.post.id
+            id: props.post.id
           }
         })
       }

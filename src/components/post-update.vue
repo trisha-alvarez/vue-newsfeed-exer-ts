@@ -40,6 +40,8 @@ import IPost from '@/interface/posts'
 import { RouteNames } from '@/constants/route-names'
 import { defineComponent, PropType, ref } from 'vue'
 import { updatePost } from '@/composables/use-post'
+import { required } from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
 import router from '@/router'
 
 export default defineComponent({
@@ -50,9 +52,17 @@ export default defineComponent({
         required: true
       }
     },
-    setup(props) {
-      const state = ref<IPost>(props.post)
+    setup(props, { emit }) {
       const invalidInput = ref(false)
+      const state = ref<IPost>(Object.assign({}, props.post))
+      const rules = ref({
+        title: { required },
+        author: { required },
+        date: {},
+        content: { required },
+        id: {}
+      })
+      const $v = ref((useVuelidate(rules, state)))
       function redirectPostView() : void {
         router.push({ 
           name: RouteNames.POST_VIEW, 
@@ -62,16 +72,18 @@ export default defineComponent({
         })
       }
       async function onSubmit() {
-        invalidInput.value = false;
-        if (state.value.title === "" || state.value.author === "" || state.value.content === "") {
+        if(await $v.value.$validate()){
+          invalidInput.value = false
+
+          if(await updatePost(state.value)){
+            alert('Post updated!')
+            redirectPostView()
+          }
+        } else {
           invalidInput.value = true
-          return
         }
 
-        if(await updatePost(props.post)){
-          alert('Post updated!')
-          redirectPostView()
-        }
+        return
       }
 
       return {

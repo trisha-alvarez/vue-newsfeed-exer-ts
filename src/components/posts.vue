@@ -6,11 +6,11 @@
                     {{post.title}}
                     <span class="text-right">
                         <button type="button" class="btn" @click="redirectPostEdit(post.id)">
-                            <i class="fas fa-edit" style="color: #219EBC"></i>
+                            <i class="fas fa-edit i-blue"></i>
                         </button>
 
                         <button type="button" class="btn" @click="postDelete(post.id)">
-                            <i class="fas fa-trash" style="color: #E63946"></i>
+                            <i class="fas fa-trash i-red"></i>
                         </button>
                     </span>
                 </h2>

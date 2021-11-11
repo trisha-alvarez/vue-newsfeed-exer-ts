@@ -10,7 +10,8 @@
 
 <script lang="ts">
 import IPost from '@/interface/posts'
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { fetchPost } from '@/composables/use-post'
 import post from '@/components/post.vue'
 
@@ -39,6 +40,15 @@ export default defineComponent({
             singlePost.value = res
             isMounted.value = !isMounted.value
         })
+        async function refetchPost() {
+            const res = await fetchPost(props.id)
+            singlePost.value = res
+        }
+        const route = useRoute()
+        watch(
+            () => route.path,
+            refetchPost
+        )
 
         return {
             singlePost,

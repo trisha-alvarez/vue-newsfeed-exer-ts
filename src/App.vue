@@ -60,4 +60,12 @@ body {
   display: block;
   width: 100%;
 }
+
+.i-blue {
+  color: #219EBC;
+}
+
+.i-red {
+  color: #E63946;
+}
 </style>

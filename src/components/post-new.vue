@@ -19,10 +19,13 @@
 import IPost from '@/interface/posts'
 import { defineComponent, ref } from 'vue'
 import { addPost } from '@/composables/use-post'
+import { required } from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
 
 export default defineComponent({
     name: 'PostNew',
     setup(props, { emit }) {
+        const invalidInput = ref<boolean>(false)
         const state = ref<IPost>({
             title: '',
             author: '',
@@ -30,29 +33,36 @@ export default defineComponent({
             content: '',
             id: ''
         })
-        const invalidInput = ref<boolean>(false)
+        const rules = ref({
+            title: { required },
+            author: { required },
+            date: {},
+            content: { required },
+            id: {}
+        })
+        const $v = ref((useVuelidate(rules, state)))
 
         async function onSubmit() {
-            invalidInput.value = false;
-            if (state.value.title === "" || state.value.author === "" || state.value.content === "") {
-                invalidInput.value = true
-                return
-            }
-            const res = await addPost(state.value)
-            if(res){
-                alert('Post added!')
-                emit('refetchFeed', true)
+            if(await $v.value.$validate()){
+                invalidInput.value = false
+                
+                if(await addPost(state.value)){
+                    alert('Post added!')
+                    emit('refetchFeed', true)
 
-                return state.value = {
-                    title: '',
-                    author: '',
-                    date: new Date().toISOString().slice(0, 10),
-                    content: '',
-                    id: ''
+                    state.value = {
+                        title: '',
+                        author: '',
+                        date: new Date().toISOString().slice(0, 10),
+                        content: '',
+                        id: ''
+                    }
                 }
             } else {
-                return
+                invalidInput.value = true
             }
+
+            return
         }
 
         return {
